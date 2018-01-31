@@ -1,5 +1,5 @@
 {
-  "name": "tajawal/selenium-server",
+  "name": "me-iod/selenium-appium-server",
   "description": "Utilities for installing and running appium and Selenium (with Chromedriver)",
   "keywords": [
     "Selenium",
@@ -12,6 +12,7 @@
   ],
   "license": "MIT",
   "minimum-stability": "dev",
+  "prefer-stable": true,
   "require": {},
   "bin": [
     "bin/appium-background-run.bash",
