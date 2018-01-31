@@ -1,5 +1,5 @@
 {
-  "name": "me-iod/selenium-appium-server",
+  "name": "me-io/selenium-appium-server",
   "description": "Utilities for installing and running appium and Selenium (with Chromedriver)",
   "keywords": [
     "Selenium",
