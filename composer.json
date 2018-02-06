@@ -15,11 +15,7 @@
   "prefer-stable": true,
   "require": {},
   "bin": [
-    "bin/appium-background-run.bash",
-    "bin/appium-run.bash",
-    "bin/appium-stop.bash",
-    "bin/selenium-background-run.bash",
-    "bin/selenium-run.bash",
-    "bin/selenium-stop.bash"
+    "bin/appium.sh",
+    "bin/selenium.sh"
   ]
 }
