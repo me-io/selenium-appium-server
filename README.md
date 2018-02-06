@@ -1,43 +1,83 @@
-# selenium-server
+<p align="center">
+  <h1 align="center">Selenium Appium Server</h1>
+  <p align="center">
+    Simple package that will configure your enviorment for using selenium or appium servers. The scripts files automatically 
+    download the required packages to run selenium or appium server.
+  </p>
+  <p align="center">
+    <a href="LICENSE.md">
+    <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square" alt="Software License">
+    </a>
+  </p>
+</p>
 
-This is a simple package to easily run Selenium with Chrome driver.
+## Requirement
 
-It does not contain the binaries, instead it will download them on first run.
+1. Bash >= 4.0
 
-It has only been run and tested on Linux.
+## Install
 
-To install it simply add 
+Just add `me-io/appium-codeception` to your project's composer.json file:
 
-`"tajawal/selenium-server": "dev-master"`
+```bash
+composer require me-io/selenium-appium-server
+```
 
-To your composer.json file and then run composer update
+```json
+{
+    "require": {
+        "me-io/selenium-appium-server": "~1"
+}
+```
 
+and then run `composer install`. This will install `selenium-appium-server` scripts inside your project.
 
-## Running
+## Running script files
 
-`bin/selenium-run.bash` To run Selenium in a terminal. You can stop the Selenium process as required by hitting [ctrl]+[c]
+The `me-io/selenium-appium-server` gives the following scripts files that you can use to run
+selenium or appium servers: 
 
-## Running in the background
+* `./bin/appium.sh`
+* `./bin/selenium.sh`
 
-`bin/selenium-background-run.bash`
+### Selenium script
 
-This will run the process in the background using nohup
+```bash
+$ ./vendor/bin/selenium.sh
 
-## Stopping the background process
+Usage:
+    selenium <command>
 
-`bin/selenium-stop.bash`
+Commands:
+    configure            - Install selenium and its dependencies.
+    start                - Start the selenium server.
+    start-background     - Start selenium server in background.
+    stop                 - Stop the selenium server.
+    restart|force-reload - Restart the selenium server.
 
-This will find a Selenium process that is running in the background and kill it
+Examples:
+    selenium start
+```
 
+### Appium script
 
-## Firefox / Chrome
+```bash
+$ ./vendor/bin/appium.sh
 
-This process uses Chrome by default.
+Usage:
+    appium <command>
 
-If you want to use it with Firefox, you need to append the `firefox` flag, eg
+Commands:
+    configure            - Install appium and its dependencies.
+    start                - Start the appium server.
+    start-background     - Start appium server in background.
+    stop                 - Stop the appium server.
+    restart|force-reload - Restart the appium server.
 
-`bin/selenium-run.bash firefox`
+Examples:
+    appium start
+```
 
-Or
+## License
 
-`bin/selenium-background-run.bash firefox`
+The code is available under the [MIT license](LICENSE.md).
