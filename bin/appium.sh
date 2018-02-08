@@ -134,6 +134,7 @@ appiumPreConfigure() {
             ant
             maven
             gradle
+            carthage
         )
         if ! brew ls --versions ${PACKAGES[@]} > /dev/null; then
             ( for package in ${PACKAGES[@]}; do
