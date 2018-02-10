@@ -1,15 +1,20 @@
-<p align="center">
-  <h1 align="center">Selenium Appium Server</h1>
-  <p align="center">
-    Simple package that will configure your enviorment for using selenium or appium servers. The scripts files automatically 
-    download the required packages to run selenium or appium server.
-  </p>
-  <p align="center">
-    <a href="LICENSE.md">
-    <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square" alt="Software License">
-    </a>
-  </p>
-</p>
+<h1 align="center">
+  Selenium Appium Server
+</h1>
+<p align="center" style="font-size: 1.2rem;">Simple package that will configure your enviorment for using selenium or appium servers. The scripts files automatically download the required packages to run selenium or appium server.</p>
+
+<hr/>
+
+[![Build Status][build-badge]](build)
+[![downloads][downloads-badge]](downloads)
+[![MIT License][license-badge]](license)
+
+[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors)
+[![PRs Welcome][prs-badge]](prs) 
+[![Code of Conduct][coc-badge]](coc)
+[![Watch on GitHub][github-watch-badge]](github-watch)
+[![Star on GitHub][github-star-badge]](github-star)
+[![Tweet][twitter-badge]](twitter)
 
 ## Requirement
 
@@ -17,11 +22,7 @@
 
 ## Install
 
-Just add `me-io/appium-codeception` to your project's composer.json file:
-
-```bash
-composer require me-io/selenium-appium-server
-```
+Just add the following to your composer.json file:
 
 ```json
 {
@@ -30,7 +31,11 @@ composer require me-io/selenium-appium-server
 }
 ```
 
-and then run `composer install`. This will install `selenium-appium-server` scripts inside your project.
+and then run `composer install`. This will install `selenium-appium-server` scripts inside your project. Or run the following command inside your terminal:
+
+```bash
+composer require me-io/selenium-appium-server
+```
 
 ## Running script files
 
@@ -91,3 +96,16 @@ A huge thanks to all of our contributors::
 ## License
 
 The code is available under the [MIT license](LICENSE.md).
+
+[build-badge]: https://img.shields.io/travis/me-io/selenium-appium-server.svg?style=flat-square
+[downloads-badge]: https://img.shields.io/packagist/dm/me-io/selenium-appium-server.svg?style=flat-square
+[license-badge]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs]: http://makeapullrequest.com
+[coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
+[github-watch-badge]: https://img.shields.io/github/watchers/me-io/selenium-appium-server.svg?style=social
+[github-watch]: https://github.com/me-io/selenium-appium-server/watchers
+[github-star-badge]: https://img.shields.io/github/stars/me-io/selenium-appium-server.svg?style=social
+[github-star]: https://github.com/me-io/selenium-appium-server/stargazers
+[twitter]: https://twitter.com/intent/tweet?text=Check%20out%20selenium-appium-server!%20https://github.com/me-io/selenium-appium-server%20%F0%9F%91%8D
+[twitter-badge]: https://img.shields.io/twitter/url/https/github.com/me-io/selenium-appium-server.svg?style=social
