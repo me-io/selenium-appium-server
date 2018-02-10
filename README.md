@@ -78,6 +78,16 @@ Examples:
     appium start
 ```
 
+## Contributors
+
+A huge thanks to all of our contributors::
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+| [<img src="https://avatars0.githubusercontent.com/u/45731?v=3" width="100px;"/><br /><sub><b>Mohamed Meabed</b></sub>](https://github.com/Meabed)<br />[💻](https://github.com//selenium-appium-server/commits?author=Meabed "Code") [📢](#talk-Meabed "Talks") | [<img src="https://avatars2.githubusercontent.com/u/16267321?v=3" width="100px;"/><br /><sub><b>Zeeshan Ahmad</b></sub>](https://github.com/zeeshanu)<br />[💻](https://github.com//selenium-appium-server/commits?author=zeeshanu "Code") [🐛](https://github.com//selenium-appium-server/issues?q=author%3Azeeshanu "Bug reports") [⚠️](https://github.com//selenium-appium-server/commits?author=zeeshanu "Tests") [📖](https://github.com//selenium-appium-server/commits?author=zeeshanu "Documentation") |
+| :---: | :---: |
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ## License
 
 The code is available under the [MIT license](LICENSE.md).
