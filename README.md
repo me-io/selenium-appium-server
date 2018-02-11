@@ -98,11 +98,15 @@ A huge thanks to all of our contributors::
 The code is available under the [MIT license](LICENSE.md).
 
 [build-badge]: https://img.shields.io/travis/me-io/selenium-appium-server.svg?style=flat-square
+[build]: https://travis-ci.org/me-io/selenium-appium-server
 [downloads-badge]: https://img.shields.io/packagist/dm/me-io/selenium-appium-server.svg?style=flat-square
+[downloads]: https://packagist.org/packages/me-io/selenium-appium-server/stats
 [license-badge]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
+[license]: https://github.com/me-io/selenium-appium-server/blob/master/LICENSE.md
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
 [prs]: http://makeapullrequest.com
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
+[coc]: https://github.com/me-io/selenium-appium-server/blob/master/CODE_OF_CONDUCT.md
 [github-watch-badge]: https://img.shields.io/github/watchers/me-io/selenium-appium-server.svg?style=social
 [github-watch]: https://github.com/me-io/selenium-appium-server/watchers
 [github-star-badge]: https://img.shields.io/github/stars/me-io/selenium-appium-server.svg?style=social
