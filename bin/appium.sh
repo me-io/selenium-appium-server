@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if (($(getBashVersion) < 4)); then
+    echo "Sorry, you need at least bash version 4 to run this script."
+    exit 1
+fi;
+
 source "$(cd "${BASH_SOURCE[0]%/*}" && pwd)/../lib/oo-bootstrap.sh"
 
 import util/type
@@ -151,6 +156,7 @@ class:Appium() {
         if ! type -p java &>/dev/null; then
             echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, java NOT found!$(UI.Color.Default)
                     \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install java:$(UI.Color.Default)
+                    \r    brew tap caskroom/versions
                     \r    brew cask install java8"
             exit 1
         fi
