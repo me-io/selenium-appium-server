@@ -41,19 +41,19 @@ class:Appium() {
 
     Appium.ConfigureSystem() {
         case "$(getOSType)" in
-        Darwin)
-            this ConfigureMac
-            ;;
-        WindowsNT)
-            this ConfigureWindows
-            ;;
-        Linux)
-            this ConfigureLinux
-            ;;
-        *)
-            machine="UNKNOWN:${unameOut}"
-            exit 1
-            ;;
+            Darwin)
+                this ConfigureMac
+                ;;
+            WindowsNT)
+                this ConfigureWindows
+                ;;
+            Linux)
+                this ConfigureLinux
+                ;;
+            *)
+                machine="UNKNOWN:${unameOut}"
+                exit 1
+                ;;
         esac
     }
 
@@ -97,8 +97,7 @@ class:Appium() {
             }' &>/dev/null
             sdkmanager "platform-tools" "platforms;android-23" &>/dev/null
             sdkmanager "build-tools;23.0.1" &>/dev/null
-        ) &
-        spinner $! "Now installing the Android SDK components"
+        ) & spinner $! "Now installing the Android SDK components"
 
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Android SDK configured successfully."
     }
@@ -112,8 +111,7 @@ class:Appium() {
         if ! brew cask ls --versions ${CASKS[@]} &>/dev/null; then
             (for cask in ${CASKS[@]}; do
                 brew cask install $cask &>/dev/null
-            done) &
-            spinner $! "Installing required cask packages."
+            done) & spinner $! "Installing required cask packages."
 
             echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Cask packages successfully installed."
         else
@@ -132,8 +130,7 @@ class:Appium() {
         if ! brew ls --versions ${PACKAGES[@]} &>/dev/null; then
             (for package in ${PACKAGES[@]}; do
                 brew install $package &>/dev/null
-            done) &
-            spinner $! "Installing required brew packages."
+            done) & spinner $! "Installing required brew packages."
 
             echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages successfully installed."
         else
@@ -232,8 +229,7 @@ class:Appium() {
 
     Appium.StartServer() {
         this ValidateAppiumRequiremetns
-        (killProcess appium) &
-        spinner $! "Killing appium server processes."
+        (killProcess appium) & spinner $! "Killing appium server processes."
         echo ""
         appium
     }
@@ -241,44 +237,39 @@ class:Appium() {
     Appium.StartServerInBackground() {
         this ValidateAppiumRequiremetns
 
-        (killProcess appium) &
-        spinner $! "Killing appium server processes."
+        (killProcess appium) & spinner $! "Killing appium server processes."
         appium &>/dev/null &
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium server started in background."
     }
 
     Appium.StopServer() {
-        (killProcess appium) &
-        spinner $! "Killing appium server processes."
+        (killProcess appium) & spinner $! "Killing appium server processes."
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium server successfully stopped."
     }
 
     Appium.RestartServer() {
         appiumPreConfigure
 
-        (killProcess appium) &
-        spinner $! "Killing appium server processes."
+        (killProcess appium) & spinner $! "Killing appium server processes."
         sleep 1
         appium
     }
 
     Appium.Usage() {
-        cat <<USAGE
-$(this APPLICATION_NAME) $(UI.Color.Green)$(this APPLICATION_VERSION)$(UI.Color.Default)
+        echo -ne "$(this APPLICATION_NAME) $(UI.Color.Green)$(this APPLICATION_VERSION)$(UI.Color.Default)
+                
+                \r$(UI.Color.Yellow)Usage:$(UI.Color.Default)
+                \r    appium <command>
 
-$(UI.Color.Yellow)Usage:$(UI.Color.Default)
-    appium <command>
+                \r$(UI.Color.Yellow)Commands:$(UI.Color.Default)
+                \r    $(UI.Color.Green)configure$(UI.Color.Default)            - Install appium and its dependencies.
+                \r    $(UI.Color.Green)start$(UI.Color.Default)                - Start the appium server.
+                \r    $(UI.Color.Green)start-background$(UI.Color.Default)     - Start appium server in background.
+                \r    $(UI.Color.Green)stop$(UI.Color.Default)                 - Stop the appium server.
+                \r    $(UI.Color.Green)restart|force-reload$(UI.Color.Default) - Restart the appium server.
 
-$(UI.Color.Yellow)Commands:$(UI.Color.Default)
-    $(UI.Color.Green)configure$(UI.Color.Default)            - Install appium and its dependencies.
-    $(UI.Color.Green)start$(UI.Color.Default)                - Start the appium server.
-    $(UI.Color.Green)start-background$(UI.Color.Default)     - Start appium server in background.
-    $(UI.Color.Green)stop$(UI.Color.Default)                 - Stop the appium server.
-    $(UI.Color.Green)restart|force-reload$(UI.Color.Default) - Restart the appium server.
-
-$(UI.Color.Yellow)Examples:$(UI.Color.Default)
-    appium start
-USAGE
+                \r$(UI.Color.Yellow)Examples:$(UI.Color.Default)
+                \r    appium start"
     }
 }
 
