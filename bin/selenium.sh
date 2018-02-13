@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if (($(getBashVersion) < 4)); then
+if ((`bash -c 'IFS=.; echo "${BASH_VERSINFO[*]: 0:1}"'` < 4)); then
     echo "Sorry, you need at least bash version 4 to run this script."
     exit 1
 fi;
