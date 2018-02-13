@@ -6,7 +6,7 @@ import util/exception util/class util/test util/log src/helper
 
 it "should kill a process by a process id"
 try
-    ( sleep 30 & )
-    killProcess sleep
+    ( sleep 5 & )
+    killProcess "sleep"
     [[ $? -eq 0 ]]
 expectPass
