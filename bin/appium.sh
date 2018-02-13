@@ -1,173 +1,99 @@
 #!/usr/bin/env bash
 
-source "$( cd "${BASH_SOURCE[0]%/*}" && pwd )/../lib/oo-bootstrap.sh"
+if (($(getBashVersion) < 4)); then
+    echo "Sorry, you need at least bash version 4 to run this script."
+    exit 1
+fi;
+
+source "$(cd "${BASH_SOURCE[0]%/*}" && pwd)/../lib/oo-bootstrap.sh"
 
 import util/type
 import src/helper
 import UI/Color
-import util/namedParameters util/class
+import util/namedParameters util/class util/variable
 import util/log util/exception util/tryCatch
 
-#*********************************************#
-#     Validate if the bash version > 4        #
-#*********************************************#
+class:Appium() {
+    private string APPLICATION_NAME = "Appium"
 
-try {
-    if (($(getBashVersion) < 4)); then
-        throw "Sorry, you need at least bash version 4 to run this script."
-    fi;
-} catch {
-    echo "File: $__BACKTRACE_SOURCE__, Line: $__BACKTRACE_LINE__"
-    Exception::PrintException "${__EXCEPTION__[@]}"
-    exit 1
-}
+    private string APPLICATION_VERSION = "1.0.0"
 
-#*********************************************#
-#              Set machine type               #
-#*********************************************#
+    Appium.Init() {
+        [string] cmd
 
-string machine=""
-
-case "$(getOSType)" in
-    Darwin)
-        machine=osx
-        ;;
-    WindowsNT)
-        machine=windows
-        ;;
-    Linux)
-        machine=linux
-        ;;
-    *)
-        machine="UNKNOWN:${unameOut}"
-esac
-
-#*********************************************#
-#              Pre MAC Setup                  #
-#  Throw if the machnie is windows or linux.  #
-#*********************************************#
-
-try {
-    if [ $machine == "linux" ] || [ $machine == "windows" ]; then
-        throw "Sorry, currently this script only supporte mac."
-    fi;
-} catch {
-    echo "File: $__BACKTRACE_SOURCE__, Line: $__BACKTRACE_LINE__"
-    Exception::PrintException "${__EXCEPTION__[@]}"
-    exit 1
-}
-
-appiumPreConfigure() {
-    if ! java -version &>/dev/null; then
-        echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, java NOT found!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install java:$(UI.Color.Default)
-        brew cask install java8"
-        exit 1
-    fi;
-
-    # Validate if java version is 8.
-    java_version=$(getJavaVersion)
-    if [ ! "$java_version" -le "18" ]; then
-        echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, appium require java8!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Uninstall the current version of java and run the following command to install java8:$(UI.Color.Default)
-        brew tap caskroom/versions
-        brew cask install java8"
-        exit 1
-    fi;
-
-    echo ""
-    echo -e "$(UI.Color.Bold)Java:$(UI.Color.Default) $(java -version 2>&1 | awk -F '"' '/version/ {print $2}')"
-    echo -e "$(UI.Color.Bold)NPM:$(UI.Color.Default)  $(npm -v)"
-    echo -e "$(UI.Color.Bold)Node:$(UI.Color.Default) $(node -v | grep -Eo [0-9.]+)"
-
-    MACHINE_TYPE=`uname -m`
-    if [ ${MACHINE_TYPE} == 'x86_64' ]; then
-      echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x64"
-    else
-      echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x32"
-    fi;
-    echo ""
-
-    #*********************************************#
-    #              Pre MAC Setup                  #
-    #*********************************************#
-
-    if [ $machine == "osx" ]; then
-        # Check if brew is installed
-        if [ ! $(which brew) ]; then
-            echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, but you need to install brew before procedding!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Use the following command to install brew:$(UI.Color.Default)
-        /usr/bin/ruby -e \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
+        case "$cmd" in
+        configure)
+            this ConfigureSystem
+            ;;
+        start)
+            this StartServer
+            ;;
+        start-background)
+            this StartServerInBackground
+            ;;
+        stop)
+            this StopServer
+            ;;
+        restart | force-reload)
+            this RestartServer
+            ;;
+        *)
+            this Usage
             exit 1
-        fi;
+            ;;
+        esac
+    }
 
-        # Check if xcode is installed
-        if [ ! $(xcode-select -p) ]; then
-            echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Xcode NOT found!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install xcode:$(UI.Color.Default)
-        xcode-select --install"
-            exit 1
-        fi;
+    Appium.ConfigureSystem() {
+        case "$(getOSType)" in
+            Darwin)
+                this ConfigureMac
+                ;;
+            WindowsNT)
+                this ConfigureWindows
+                ;;
+            Linux)
+                this ConfigureLinux
+                ;;
+            *)
+                machine="UNKNOWN:${unameOut}"
+                exit 1
+                ;;
+        esac
+    }
 
-        # Check if brew cask is installed
-        if [ ! "$(brew info cask)" ]; then
-            echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Homebrew-Cask NOT found!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install Homebrew-Cask:$(UI.Color.Default)
-        brew tap caskroom/cask"
-            exit 1
-        fi;
+    Appium.ConfigureMac() {
+        this ValidateAppiumRequiremetns
+        this DisplaySysmtemConfig
+        this ConfigureAndroidSDK
+        this InstallBrewPackages
+        this InstallBrewCaskPackages
+        this AlertSetEnvironmentVariable
+    }
 
-        # Validate if python version is 3.
-        if ! python3 -V &>/dev/null; then
-            echo -e "\n$(UI.Color.Red)$(UI.Powerline.Fail)$(UI.Color.Default) Sorry, python3 NOT found!
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install python:$(UI.Color.Default)
-        brew install python3"
-            exit 1
-        fi;
+    Appium.AlertSetEnvironmentVariable() {
+        # Configuring environment variable's
+        echo ""
+        echo -ne "$(UI.Color.Green)$(UI.Powerline.Lightning)  Manually set following environment variable's inside .bash_profile or .zshrc.$(UI.Color.Default)
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export ANT_HOME=/usr/local/opt/ant
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export MAVEN_HOME=/usr/local/opt/maven
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export GRADLE_HOME=/usr/local/opt/gradle
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export ANDROID_HOME=/usr/local/share/android-sdk
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export ANDROID_NDK_HOME=/usr/local/share/android-ndk
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export JAVA_HOME=\$(/usr/libexec/java_home)
 
-        if java -version &>/dev/null; then
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Java already installed. Skipping"
-        fi;
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANT_HOME/bin:\$PATH
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$MAVEN_HOME/bin:\$PATH
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$GRADLE_HOME/bin:\$PATH
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANDROID_HOME/tools:\$PATH
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANDROID_HOME/platform-tools:\$PATH
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANDROID_HOME/build-tools/23.0.1:\$PATH
+                \r$(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$JAVA_HOME/bin:\$PATH"
+    }
 
-        # Install brew packages
-        PACKAGES=(
-            ant
-            maven
-            gradle
-            carthage
-        )
-        if ! brew ls --versions ${PACKAGES[@]} > /dev/null; then
-            ( for package in ${PACKAGES[@]}; do
-                if ! brew ls --versions $package > /dev/null; then
-                    brew install $package &>/dev/null
-                fi;
-            done; ) & spinner $! "Installing required brew packages."
-
-            echo "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages successfully installed."
-        else
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages already installed. Skipping"
-        fi;
-
-        # Install cask packages
-        if ! brew ls --versions cask > /dev/null; then
-            ( brew tap caskroom/cask &>/dev/null ) & spinner $! "Installing latest version of Homebrew-Cask."
-        fi;
-
-        CASKS=(
-            android-sdk
-            android-ndk
-        )
-        if ! brew cask ls --versions ${CASKS[@]} &> /dev/null; then
-            ( for cask in ${CASKS[@]}; do
-                brew cask install $cask &>/dev/null
-            done; ) & spinner $! "Installing required cask packages."
-
-            echo "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Cask packages successfully installed."
-        else
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Cask packages already installed. Skipping"
-        fi;
-
-        ( /usr/bin/expect -c '
+    Appium.ConfigureAndroidSDK() {
+        (
+            /usr/bin/expect -c '
             set timeout -1;
             spawn sdkmanager --licenses;
             expect {
@@ -175,98 +101,186 @@ appiumPreConfigure() {
                 eof
             }' &>/dev/null
             sdkmanager "platform-tools" "platforms;android-23" &>/dev/null
-            sdkmanager "build-tools;23.0.1"  &>/dev/null ) & spinner $! "Now installing the Android SDK components"
+            sdkmanager "build-tools;23.0.1" &>/dev/null
+        ) & spinner $! "Now installing the Android SDK components"
 
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Android SDK configured successfully."
+    }
 
+    Appium.InstallBrewCaskPackages() {
+        array CASKS=(
+            'android-sdk'
+            'android-ndk'
+        )
 
-        # Installing node
-        if [ ! $(which node) ]; then
-            ( brew install node &>/dev/null ) & spinner $! "Installing latest version of node."
+        if ! brew cask ls --versions ${CASKS[@]} &>/dev/null; then
+            (for cask in ${CASKS[@]}; do
+                brew cask install $cask &>/dev/null
+            done) & spinner $! "Installing required cask packages."
 
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Node latest version installed successfully."
+            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Cask packages successfully installed."
         else
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Node already installed. Skipping"
-        fi;
+            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Cask packages already installed. Skipping"
+        fi
+    }
 
-        # Installing appium
-        if [ ! $(which appium) ]; then
-            ( npm install -g appium &>/dev/null ) & spinner $! "Installing latest version of appium."
+    Appium.InstallBrewPackages() {
+        array PACKAGES=(
+            'ant'
+            'maven'
+            'gradle'
+            'carthage'
+        )
 
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium latest version installed successfully."
+        if ! brew ls --versions ${PACKAGES[@]} &>/dev/null; then
+            (for package in ${PACKAGES[@]}; do
+                brew install $package &>/dev/null
+            done) & spinner $! "Installing required brew packages."
+
+            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages successfully installed."
         else
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium already installed. Skipping"
-        fi;
+            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages already installed. Skipping"
+        fi
+    }
 
-        # Configuring environment variable's
-        echo -e "\n$(UI.Color.Green)$(UI.Powerline.Lightning)  Manually set following environment variable's inside .bash_profile or .zshrc.$(UI.Color.Default)
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export ANT_HOME=/usr/local/opt/ant
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export MAVEN_HOME=/usr/local/opt/maven
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export GRADLE_HOME=/usr/local/opt/gradle
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export ANDROID_HOME=/usr/local/share/android-sdk
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export ANDROID_NDK_HOME=/usr/local/share/android-ndk
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export JAVA_HOME=\$(/usr/libexec/java_home)
+    Appium.ValidateAppiumRequiremetns() {
+        # Exit if the xcode is not installed
+        if ! type -p xcode-select &>/dev/null; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Xcode NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install xcode:$(UI.Color.Default)
+                    \r    xcode-select --install"
+            exit 1
+        fi
 
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANT_HOME/bin:\$PATH
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$MAVEN_HOME/bin:\$PATH
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$GRADLE_HOME/bin:\$PATH
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANDROID_HOME/tools:\$PATH
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANDROID_HOME/platform-tools:\$PATH
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$ANDROID_HOME/build-tools/23.0.1:\$PATH
-    $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$JAVA_HOME/bin:\$PATH"
-    fi;
-}
+        # Check if Java is installed if not then exit
+        if ! type -p java &>/dev/null; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, java NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install java:$(UI.Color.Default)
+                    \r    brew tap caskroom/versions
+                    \r    brew cask install java8"
+            exit 1
+        fi
 
-case "$1" in
-    configure)
-        appiumPreConfigure
-        echo -e "\n$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium successfully configured on your laptop."
-        ;;
+        # Exit if the java version is not 8
+        if [ ! "$(getJavaVersion)" -le "18" ]; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, appium require java8!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Uninstall the current version of java and run the following command to install java8:$(UI.Color.Default)
+                    \r    brew tap caskroom/versions
+                    \r    brew cask install java8"
+            exit 1
+        fi
 
-    start)
-        appiumPreConfigure
+        # Check if brew is installed
+        if ! type -p brew &>/dev/null; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, but you need to install brew before procedding!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Use the following command to install brew:$(UI.Color.Default)
+                    \r    /usr/bin/ruby -e \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
+            exit 1
+        fi
 
-        ( killProcess appium ) & spinner $! "Killing appium server processes."
+        # Check if brew cask is installed
+        if ! type -p cask &>/dev/null; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Homebrew-Cask NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install Homebrew-Cask:$(UI.Color.Default)
+                    \r    brew tap caskroom/cask"
+            exit 1
+        fi
+
+        # Validate if python version is 3.
+        if ! type -p python3 &>/dev/null; then
+            echo -ne "\n$(UI.Color.Red)$(UI.Powerline.Fail)$(UI.Color.Default) Sorry, python3 NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install python:$(UI.Color.Default)
+                    \r    brew install python3"
+            exit 1
+        fi
+
+        # Exit if node is not installed
+        if ! type -p node &>/dev/null; then
+            echo -ne "\n$(UI.Color.Red)$(UI.Powerline.Fail)$(UI.Color.Default) Sorry, node NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install latest version node:$(UI.Color.Default)
+                    \r    brew install node"
+            exit 1
+        fi
+
+        # Install the latest version of appium
+        if ! type -p appium &>/dev/null; then
+            echo -ne "\n$(UI.Color.Red)$(UI.Powerline.Fail)$(UI.Color.Default) Sorry, appium NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install latest version appium:$(UI.Color.Default)
+                    \r    npm install -g appium"
+            exit 1
+        fi
+    }
+
+    Appium.DisplaySysmtemConfig() {
+        echo ""
+        echo -e "$(UI.Color.Bold)Java:$(UI.Color.Default) $(java -version 2>&1 | awk -F '"' '/version/ {print $2}')"
+        echo -e "$(UI.Color.Bold)NPM:$(UI.Color.Default)  $(npm -v)"
+        echo -e "$(UI.Color.Bold)Node:$(UI.Color.Default) $(node -v | grep -Eo [0-9.]+)"
+
+        if [ "$(uname -m)" == 'x86_64' ]; then
+            echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x64"
+        else
+            echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x32"
+        fi
+        echo ""
+    }
+
+    Appium.ConfigureWindows() {
+        throw "Sorry, currently this script only supporte mac."
+    }
+
+    Appium.ConfigureLinux() {
+        throw "Sorry, currently this script only supporte mac."
+    }
+
+    Appium.StartServer() {
+        this ValidateAppiumRequiremetns
+        (killProcess appium) & spinner $! "Killing appium server processes."
         echo ""
         appium
-        ;;
+    }
 
-    start-background)
-        appiumPreConfigure
+    Appium.StartServerInBackground() {
+        this ValidateAppiumRequiremetns
 
-        ( killProcess appium ) & spinner $! "Killing appium server processes."
+        (killProcess appium) & spinner $! "Killing appium server processes."
         appium &>/dev/null &
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium server started in background."
-        ;;
+    }
 
-    stop)
-        ( killProcess appium ) & spinner $! "Killing appium server processes."
+    Appium.StopServer() {
+        (killProcess appium) & spinner $! "Killing appium server processes."
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium server successfully stopped."
-        ;;
+    }
 
-    restart|force-reload)
+    Appium.RestartServer() {
         appiumPreConfigure
 
-        ( killProcess appium ) & spinner $! "Killing appium server processes."
+        (killProcess appium) & spinner $! "Killing appium server processes."
         sleep 1
         appium
-        ;;
+    }
 
-    *)
-        cat <<EOS
-$(UI.Color.Yellow)Usage:$(UI.Color.Default)
-    appium <command>
+    Appium.Usage() {
+        echo -ne "$(this APPLICATION_NAME) $(UI.Color.Green)$(this APPLICATION_VERSION)$(UI.Color.Default)
+                
+                \r$(UI.Color.Yellow)Usage:$(UI.Color.Default)
+                \r    appium <command>
 
-$(UI.Color.Yellow)Commands:$(UI.Color.Default)
-    $(UI.Color.Green)configure$(UI.Color.Default)            - Install appium and its dependencies.
-    $(UI.Color.Green)start$(UI.Color.Default)                - Start the appium server.
-    $(UI.Color.Green)start-background$(UI.Color.Default)     - Start appium server in background.
-    $(UI.Color.Green)stop$(UI.Color.Default)                 - Stop the appium server.
-    $(UI.Color.Green)restart|force-reload$(UI.Color.Default) - Restart the appium server.
+                \r$(UI.Color.Yellow)Commands:$(UI.Color.Default)
+                \r    $(UI.Color.Green)configure$(UI.Color.Default)            - Install appium and its dependencies.
+                \r    $(UI.Color.Green)start$(UI.Color.Default)                - Start the appium server.
+                \r    $(UI.Color.Green)start-background$(UI.Color.Default)     - Start appium server in background.
+                \r    $(UI.Color.Green)stop$(UI.Color.Default)                 - Stop the appium server.
+                \r    $(UI.Color.Green)restart|force-reload$(UI.Color.Default) - Restart the appium server.
 
-$(UI.Color.Yellow)Examples:$(UI.Color.Default)
-    appium start
-EOS
-        exit
-        ;;
-esac
+                \r$(UI.Color.Yellow)Examples:$(UI.Color.Default)
+                \r    appium start"
+    }
+}
+
+Type::Initialize Appium
+
+Appium AppiumObject
+
+$var:AppiumObject Init $1

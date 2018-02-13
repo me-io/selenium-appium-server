@@ -1,197 +1,209 @@
 #!/usr/bin/env bash
 
-source "$( cd "${BASH_SOURCE[0]%/*}" && pwd )/../lib/oo-bootstrap.sh"
+if (($(getBashVersion) < 4)); then
+    echo "Sorry, you need at least bash version 4 to run this script."
+    exit 1
+fi;
+
+source "$(cd "${BASH_SOURCE[0]%/*}" && pwd)/../lib/oo-bootstrap.sh"
 
 import util/type
 import src/helper
 import UI/Color
-import util/namedParameters util/class
+import util/namedParameters util/class util/variable
 import util/log util/exception util/tryCatch
 
-#*********************************************#
-#     Validate if the bash version > 4        #
-#*********************************************#
+class:Selenium() {
+    private string APPLICATION_NAME = "Selenium"
 
-try {
-    if (($(getBashVersion) < 4)); then
-        throw "Sorry, you need at least bash version 4 to run this script."
-    fi;
-} catch {
-    echo "File: $__BACKTRACE_SOURCE__, Line: $__BACKTRACE_LINE__"
-    Exception::PrintException "${__EXCEPTION__[@]}"
-    exit 1
-}
+    private string APPLICATION_VERSION = "1.0.0"
 
-function seleniumPreConfigure() {
-    #*********************************************#
-    #              Set machine type               #
-    #*********************************************#
+    Selenium.Init() {
+        [string] cmd
 
-    string machine=""
-
-    case "$(getOSType)" in
-        Darwin)
-            machine=osx
+        case "$cmd" in
+        configure)
+            this ConfigureSystem
             ;;
-        WindowsNT)
-            machine=windows
+        start)
+            this StartServer
             ;;
-        Linux)
-            machine=linux
+        start-background)
+            this StartServerInBackground
+            ;;
+        stop)
+            this StopServer
+            ;;
+        restart | force-reload)
+            this RestartServer
             ;;
         *)
-            machine="UNKNOWN:${unameOut}"
-    esac
-
-    #*********************************************#
-    #              Pre MAC Setup                  #
-    #  Throw if the machnie is windows or linux.  #
-    #*********************************************#
-
-    try {
-        if [ $machine == "linux" ] || [ $machine == "windows" ]; then
-            throw "Sorry, currently this script only supporte mac."
-        fi;
-    } catch {
-        echo "File: $__BACKTRACE_SOURCE__, Line: $__BACKTRACE_LINE__"
-        Exception::PrintException "${__EXCEPTION__[@]}"
-        exit 1
+            this Usage
+            exit 1
+            ;;
+        esac
     }
 
-    if ! java -version &>/dev/null; then
-        echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, java NOT found!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install java:$(UI.Color.Default)
-        brew cask install java8"
-        exit 1
-    fi;
+    Selenium.ConfigureSystem() {
+        case "$(getOSType)" in
+            Darwin)
+                this ConfigureMac
+                ;;
+            WindowsNT)
+                this ConfigureWindows
+                ;;
+            Linux)
+                this ConfigureLinux
+                ;;
+            *)
+                machine="UNKNOWN:${unameOut}"
+                exit 1
+                ;;
+        esac
+    }
 
-    # Validate if java version is 8.
-    java_version=$(getJavaVersion)
-    if [ ! "$java_version" -le "18" ]; then
-        echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, appium require java8!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Uninstall the current version of java and run the following command to install java8:$(UI.Color.Default)
-        brew tap caskroom/versions
-        brew cask install java8"
-        exit 1
-    fi;
+    Selenium.ConfigureMac() {
+        this ValidateSeleniumRequiremetns
+        this DisplaySysmtemConfig
+        this InstallBrewPackages
+        this AlertSetEnvironmentVariable
+    }
 
-    echo ""
-    echo -e "$(UI.Color.Bold)Java:$(UI.Color.Default) $(java -version 2>&1 | awk -F '"' '/version/ {print $2}')"
-    echo -e "$(UI.Color.Bold)NPM:$(UI.Color.Default)  $(npm -v)"
-    echo -e "$(UI.Color.Bold)Node:$(UI.Color.Default) $(node -v | grep -Eo [0-9.]+)"
+    Selenium.AlertSetEnvironmentVariable() {
+        [string] seleniumVersion=$(brew ls --versions selenium-server-standalone | perl -pe 'if(($_)=/([0-9]+([.][0-9]+)+)/){$_.="\n"}')
 
-    MACHINE_TYPE=`uname -m`
-    if [ ${MACHINE_TYPE} == 'x86_64' ]; then
-      echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x64"
-    else
-      echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x32"
-    fi;
-    echo ""
+        echo ""
+        echo -e "\n$(UI.Color.Green)$(UI.Powerline.Lightning)  Now you need to manually update selenium-server bin file.$(UI.Color.Default)
+        \rOpen $(UI.Color.Cyan)/usr/local/Cellar/selenium-server-standalone/$seleniumVersion/bin/selenium-server$(UI.Color.Default) inside code editor and update the following line:
 
-    #*********************************************#
-    #              Pre MAC Setup                  #
-    #*********************************************#
+        \rexec java -jar /usr/local/Cellar/selenium-server-standalone/$seleniumVersion/libexec/selenium-server-standalone-$seleniumVersion.jar \"\$@\"
+                                                        $(UI.Color.Green)⬇$(UI.Color.Default)
+        \rexec java \"\$@\" -jar /usr/local/Cellar/selenium-server-standalone/$seleniumVersion/libexec/selenium-server-standalone-$seleniumVersion.jar"
+    }
 
-    if [ $machine == "osx" ]; then
-        # Check if brew is installed
-        if [ ! $(which brew) ]; then
-            echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, but you need to install brew before procedding!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Use the following command to install brew:$(UI.Color.Default)
-        /usr/bin/ruby -e \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
-            exit 1
-        fi;
-
-        # Check if xcode is installed
-        if [ ! $(xcode-select -p) ]; then
-            echo -e "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Xcode NOT found!$(UI.Color.Default)
-    $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install xcode:$(UI.Color.Default)
-        xcode-select --install"
-            exit 1
-        fi;
-
-        if java -version &>/dev/null; then
-            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Java already installed. Skipping"
-        fi;
-
-        # Install brew packages
-        PACKAGES=(
-            selenium-server-standalone
-            chromedriver
+    Selenium.InstallBrewPackages() {
+        array PACKAGES=(
+            'selenium-server-standalone'
+            'chromedriver'
         )
-        if ! brew ls --versions ${PACKAGES[@]} > /dev/null; then
-            ( for package in ${PACKAGES[@]}; do
-                if ! brew ls --versions $package > /dev/null; then
-                    brew install $package &>/dev/null
-                fi;
-            done; ) & spinner $! "Installing required brew packages."
 
-            echo "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages successfully installed."
+        if ! brew ls --versions ${PACKAGES[@]} &>/dev/null; then
+            (for package in ${PACKAGES[@]}; do
+                brew install $package &>/dev/null
+            done) & spinner $! "Installing required brew packages."
+
+            echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages successfully installed."
         else
             echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Brew packages already installed. Skipping"
-        fi;
+        fi
+    }
 
-        seleniumVersion=$(brew ls --versions selenium-server-standalone | perl -pe 'if(($_)=/([0-9]+([.][0-9]+)+)/){$_.="\n"}')
+    Selenium.ValidateSeleniumRequiremetns() {
+        # Check if Java is installed if not then exit
+        if ! type -p java &>/dev/null; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, java NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install java:$(UI.Color.Default)
+                    \r    brew tap caskroom/versions
+                    \r    brew cask install java8"
+            exit 1
+        fi
 
-    # Configuring environment variable's
-    echo -e "\n$(UI.Color.Green)$(UI.Powerline.Lightning)  Now you need to manually update selenium-server bin file.$(UI.Color.Default)
-   Open $(UI.Color.Cyan)/usr/local/Cellar/selenium-server-standalone/$seleniumVersion/bin/selenium-server$(UI.Color.Default) inside code editor and update the following line:
+        # Exit if the java version is not 8
+        if [ ! "$(getJavaVersion)" -le "18" ]; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Selenium require java8!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Uninstall the current version of java and run the following command to install java8:$(UI.Color.Default)
+                    \r    brew tap caskroom/versions
+                    \r    brew cask install java8"
+            exit 1
+        fi
 
-       exec java -jar /usr/local/Cellar/selenium-server-standalone/$seleniumVersion/libexec/selenium-server-standalone-$seleniumVersion.jar \"\$@\"
-                                                        $(UI.Color.Green)⬇$(UI.Color.Default)
-       exec java \"\$@\" -jar /usr/local/Cellar/selenium-server-standalone/$seleniumVersion/libexec/selenium-server-standalone-$seleniumVersion.jar"
-    fi;
-}
+        # Check if brew is installed
+        if ! type -p brew &>/dev/null; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, but you need to install brew before procedding!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Use the following command to install brew:$(UI.Color.Default)
+                    \r    /usr/bin/ruby -e \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
+            exit 1
+        fi
 
-case "$1" in
-    configure)
-        seleniumPreConfigure
-        echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Selenium successfully configured on your laptop."
-        ;;
+        # Check if brew cask is installed
+        if ! type -p cask &>/dev/null; then
+            echo -ne "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Homebrew-Cask NOT found!$(UI.Color.Default)
+                    \r$(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install Homebrew-Cask:$(UI.Color.Default)
+                    \r    brew tap caskroom/cask"
+            exit 1
+        fi
+    }
 
-    start)
-        seleniumPreConfigure
+    Selenium.DisplaySysmtemConfig() {
+        echo ""
+        echo -e "$(UI.Color.Bold)Java:$(UI.Color.Default) $(java -version 2>&1 | awk -F '"' '/version/ {print $2}')"
+        echo -e "$(UI.Color.Bold)NPM:$(UI.Color.Default)  $(npm -v)"
+        echo -e "$(UI.Color.Bold)Node:$(UI.Color.Default) $(node -v | grep -Eo [0-9.]+)"
 
+        if [ "$(uname -m)" == 'x86_64' ]; then
+            echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x64"
+        else
+            echo -e "$(UI.Color.Bold)OS:$(UI.Color.Default)   $(getOSType) x32"
+        fi
+        echo ""
+    }
+
+    Selenium.ConfigureWindows() {
+        throw "Sorry, currently this script only supporte mac."
+    }
+
+    Selenium.ConfigureLinux() {
+        throw "Sorry, currently this script only supporte mac."
+    }
+
+    Selenium.StartServer() {
+        this ValidateSeleniumRequiremetns
         ( killProcess selenium-server ) & spinner $! "Killing selenium server processes."
         echo ""
         selenium-server -Dwebdriver.chrome.bin="/Applications/Google Chrome.app" -Dwebdriver.chrome.driver=chromedriver
-        ;;
+    }
 
-    start-background)
-        seleniumPreConfigure
+    Selenium.StartServerInBackground() {
+        this ValidateSeleniumRequiremetns
 
         ( killProcess selenium-server ) & spinner $! "Killing selenium server processes."
         selenium-server -Dwebdriver.chrome.bin="/Applications/Google Chrome.app" -Dwebdriver.chrome.driver=chromedriver &>/dev/null &
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Selenium server started in background."
-        ;;
+    }
 
-    stop)
+    Selenium.StopServer() {
         ( killProcess selenium-server ) & spinner $! "Killing selenium server processes."
         echo -e "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Selenium server successfully stopped."
-        ;;
+    }
 
-    restart|force-reload)
-        seleniumPreConfigure
+    Selenium.RestartServer() {
+        SeleniumPreConfigure
 
         ( killProcess selenium-server ) & spinner $! "Killing selenium server processes."
         sleep 1
         selenium-server -Dwebdriver.chrome.bin="/Applications/Google Chrome.app" -Dwebdriver.chrome.driver=chromedriver
-        ;;
+    }
 
-    *)
-        cat <<EOS
-$(UI.Color.Yellow)Usage:$(UI.Color.Default)
-    selenium <command>
+    Selenium.Usage() {
+        echo -ne "$(this APPLICATION_NAME) $(UI.Color.Green)$(this APPLICATION_VERSION)$(UI.Color.Default)
+                
+                \r$(UI.Color.Yellow)Usage:$(UI.Color.Default)
+                \r    selenium <command>
 
-$(UI.Color.Yellow)Commands:$(UI.Color.Default)
-    $(UI.Color.Green)configure$(UI.Color.Default)            - Install selenium and its dependencies.
-    $(UI.Color.Green)start$(UI.Color.Default)                - Start the selenium server.
-    $(UI.Color.Green)start-background$(UI.Color.Default)     - Start selenium server in background.
-    $(UI.Color.Green)stop$(UI.Color.Default)                 - Stop the selenium server.
-    $(UI.Color.Green)restart|force-reload$(UI.Color.Default) - Restart the selenium server.
+                \r$(UI.Color.Yellow)Commands:$(UI.Color.Default)
+                \r    $(UI.Color.Green)configure$(UI.Color.Default)            - Install selenium and its dependencies.
+                \r    $(UI.Color.Green)start$(UI.Color.Default)                - Start the selenium server.
+                \r    $(UI.Color.Green)start-background$(UI.Color.Default)     - Start selenium server in background.
+                \r    $(UI.Color.Green)stop$(UI.Color.Default)                 - Stop the selenium server.
+                \r    $(UI.Color.Green)restart|force-reload$(UI.Color.Default) - Restart the selenium server.
 
-$(UI.Color.Yellow)Examples:$(UI.Color.Default)
-    selenium start
-EOS
-        exit
-        ;;
-esac
+                \r$(UI.Color.Yellow)Examples:$(UI.Color.Default)
+                \r    selenium start"
+    }
+}
+
+Type::Initialize Selenium
+
+Selenium SeleniumObject
+
+$var:SeleniumObject Init $1
