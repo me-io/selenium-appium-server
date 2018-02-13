@@ -17,6 +17,13 @@ class:Appium() {
 
     private string APPLICATION_VERSION = "1.0.0"
 
+    #######################################
+    # Main entry of the CLI Application
+    # Arguments:
+    #   cmd string command to run
+    # Returns:
+    #   None
+    #######################################
     Appium.Init() {
         [string] cmd
 
@@ -43,6 +50,13 @@ class:Appium() {
         esac
     }
 
+    #######################################
+    # Check what is the type of the OS
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.ConfigureSystem() {
         case "$(getOSType)" in
             Darwin)
@@ -55,12 +69,17 @@ class:Appium() {
                 this ConfigureLinux
                 ;;
             *)
-                machine="UNKNOWN:${unameOut}"
-                exit 1
-                ;;
+                error "UNKNOWN:${unameOut}" ;;
         esac
     }
 
+    #######################################
+    # Configure mac environment for appium server
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.ConfigureMac() {
         this DisplaySysmtemConfig
         this ValidateAppiumRequiremetns
@@ -70,7 +89,13 @@ class:Appium() {
         this AlertSetEnvironmentVariable
     }
 
-    # Configuring environment variable's
+    #######################################
+    # Display a message to user for configuring environment variables
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.AlertSetEnvironmentVariable() {
         output ""
         cat <<EOS
@@ -92,6 +117,13 @@ $(UI.Color.White)$(UI.Powerline.PointingArrow)$(UI.Color.Default) export PATH=\$
 EOS
     }
 
+    #######################################
+    # Install and configure android sdk on user machine
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.ConfigureAndroidSDK() {
         output "$(UI.Powerline.PointingArrow)$(UI.Color.Default) Now installing the Android SDK components."
 
@@ -108,6 +140,13 @@ EOS
         output "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Android SDK configured successfully."
     }
 
+    #######################################
+    # Install and configure brew cask packages on user machine
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.InstallBrewCaskPackages() {
         array CASKS=(
             'android-sdk'
@@ -126,6 +165,13 @@ EOS
         fi
     }
 
+    #######################################
+    # Install and configure brew packages on user machine
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.InstallBrewPackages() {
         array PACKAGES=(
             'ant'
@@ -146,6 +192,13 @@ EOS
         fi
     }
 
+    #######################################
+    # Checks if the required application are installed for configuring appium
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.ValidateAppiumRequiremetns() {
         # Exit if the xcode is not installed
         if ! type -p xcode-select &>/dev/null; then
@@ -214,6 +267,13 @@ EOS
         fi
     }
 
+    #######################################
+    # Displays the system configuration
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.DisplaySysmtemConfig() {
         output ""
         output "$(UI.Color.Bold)Java:$(UI.Color.Default) $(java -version 2>&1 | awk -F '"' '/version/ {print $2}')"
@@ -228,14 +288,35 @@ EOS
         output  ""
     }
 
+    #######################################
+    # Configure windows environment for appium server
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.ConfigureWindows() {
         throw "Sorry, currently this script only supporte mac."
     }
 
+    #######################################
+    # Configure linux environment for appium server
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.ConfigureLinux() {
         throw "Sorry, currently this script only supporte mac."
     }
 
+    #######################################
+    # Validate appium requirements and then start the appium server
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.StartServer() {
         this ValidateAppiumRequiremetns
         
@@ -246,6 +327,13 @@ EOS
         output $(appium 1>&2)
     }
 
+    #######################################
+    # Validate appium requirements and then start the appium server in background
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.StartServerInBackground() {
         this ValidateAppiumRequiremetns
 
@@ -256,6 +344,13 @@ EOS
         output "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium server started in background."
     }
 
+    #######################################
+    # Stop the appium server
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.StopServer() {
         output "$(UI.Powerline.PointingArrow)$(UI.Color.Default) Killing appium server processes."
         
@@ -264,6 +359,13 @@ EOS
         output "$(UI.Color.Green)$(UI.Powerline.OK)$(UI.Color.Default) Appium server successfully stopped."
     }
 
+    #######################################
+    # Validate appium requirements and then restart the appium server
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.RestartServer() {
         this ValidateAppiumRequiremetns
 
@@ -274,6 +376,13 @@ EOS
         output $(appium 1>&2)
     }
 
+    #######################################
+    # Display the usage of the appium command
+    # Arguments:
+    #   None
+    # Returns:
+    #   None
+    #######################################
     Appium.Usage() {
         cat <<EOS
 $(this APPLICATION_NAME) $(UI.Color.Green)$(this APPLICATION_VERSION)$(UI.Color.Default)
