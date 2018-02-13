@@ -128,7 +128,7 @@ Logger::WARN() {
     Console::WriteStdErrAnnotated "${BASH_SOURCE[3]##*/}" ${BASH_LINENO[2]} $(UI.Color.Yellow) WARN "$@"
 }
 Logger::CUSTOM() {
-    Console::WriteStdErr "$(UI.Color.Yellow)[${subject^^}] $(UI.Color.Default)$* "
+    Console::WriteStdErr "$(UI.Color.Default)$@ "
 }
 Logger::DETAILED() {
     Console::WriteStdErrAnnotated "${BASH_SOURCE[3]##*/}" ${BASH_LINENO[2]} $(UI.Color.Yellow) "${subject^^}" "$@"
