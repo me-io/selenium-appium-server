@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# This cli tool requires bash >= 4. So, exit if the version of bash version is lower than 4.
 if ((`bash -c 'IFS=.; echo "${BASH_VERSINFO[*]: 0:1}"'` < 4)); then
     echo "Sorry, you need at least bash version 4 to run this script."
     exit 1
@@ -12,6 +13,14 @@ import UI/Color
 import util/namedParameters util/class util/variable
 import util/log util/exception util/tryCatch
 
+#######################################
+# Appium, a simple cli tool that will setup your environment for appium server
+# Author: me-io - https://github.com/me-io
+# https://github.com/me-io/selenium-appium-server#contributors
+# Check out README.md for more details
+#
+# TODO: Add windows and linux support
+#######################################
 class:Appium() {
     private string APPLICATION_NAME = "Appium"
 
@@ -193,7 +202,7 @@ EOS
     }
 
     #######################################
-    # Checks if the required application are installed for configuring appium
+    # Checks if the required applications are installed for configuring appium
     # Arguments:
     #   None
     # Returns:
