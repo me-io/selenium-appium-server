@@ -216,7 +216,7 @@ EOS
     #   None
     #######################################
     Selenium.ConfigureWindows() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################
@@ -227,7 +227,7 @@ EOS
     #   None
     #######################################
     Selenium.ConfigureLinux() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################

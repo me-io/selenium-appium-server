@@ -305,7 +305,7 @@ EOS
     #   None
     #######################################
     Appium.ConfigureWindows() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################
@@ -316,7 +316,7 @@ EOS
     #   None
     #######################################
     Appium.ConfigureLinux() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################
