@@ -92,7 +92,7 @@ class:Selenium() {
     #   None
     #######################################
     Selenium.ConfigureMac() {
-        this ValidateSeleniumRequiremetns
+        this ValidateSeleniumRequirements
         this DisplaySysmtemConfig
         this InstallBrewPackages
         this AlertSetEnvironment
@@ -151,7 +151,7 @@ EOS
     # Returns:
     #   None
     #######################################
-    Selenium.ValidateSeleniumRequiremetns() {
+    Selenium.ValidateSeleniumRequirements() {
         # Check if Java is installed if not then exit
         if ! type -p java &>/dev/null; then
             output "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, java NOT found!$(UI.Color.Default)
@@ -179,7 +179,7 @@ EOS
         fi
 
         # Check if brew cask is installed
-        if ! type -p cask &>/dev/null; then
+        if ! brew info cask &>/dev/null; then
             output "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Homebrew-Cask NOT found!$(UI.Color.Default)
                     $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install Homebrew-Cask:$(UI.Color.Default)
                         brew tap caskroom/cask"
@@ -216,7 +216,7 @@ EOS
     #   None
     #######################################
     Selenium.ConfigureWindows() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################
@@ -227,7 +227,7 @@ EOS
     #   None
     #######################################
     Selenium.ConfigureLinux() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################
@@ -238,7 +238,7 @@ EOS
     #   None
     #######################################
     Selenium.StartServer() {
-        this ValidateSeleniumRequiremetns
+        this ValidateSeleniumRequirements
         
         output "$(UI.Powerline.PointingArrow)$(UI.Color.Default) Killing selenium server processes."
         killProcess selenium-server
@@ -255,7 +255,7 @@ EOS
     #   None
     #######################################
     Selenium.StartServerInBackground() {
-        this ValidateSeleniumRequiremetns
+        this ValidateSeleniumRequirements
 
         output "$(UI.Powerline.PointingArrow)$(UI.Color.Default) Killing selenium server processes."
         killProcess selenium-server

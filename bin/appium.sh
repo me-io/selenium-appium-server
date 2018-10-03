@@ -91,7 +91,7 @@ class:Appium() {
     #######################################
     Appium.ConfigureMac() {
         this DisplaySysmtemConfig
-        this ValidateAppiumRequiremetns
+        this ValidateAppiumRequirements
         this ConfigureAndroidSDK
         this InstallBrewPackages
         this InstallBrewCaskPackages
@@ -208,7 +208,7 @@ EOS
     # Returns:
     #   None
     #######################################
-    Appium.ValidateAppiumRequiremetns() {
+    Appium.ValidateAppiumRequirements() {
         # Exit if the xcode is not installed
         if ! type -p xcode-select &>/dev/null; then
             output "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Xcode NOT found!$(UI.Color.Default)
@@ -244,7 +244,7 @@ EOS
         fi
 
         # Check if brew cask is installed
-        if ! type -p cask &>/dev/null; then
+        if ! brew info cask &>/dev/null; then
             output "$(UI.Color.Red)$(UI.Powerline.Fail) Sorry, Homebrew-Cask NOT found!$(UI.Color.Default)
                     $(UI.Color.Green)$(UI.Powerline.PointingArrow) Run the following command to install Homebrew-Cask:$(UI.Color.Default)
                         brew tap caskroom/cask"
@@ -305,7 +305,7 @@ EOS
     #   None
     #######################################
     Appium.ConfigureWindows() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################
@@ -316,7 +316,7 @@ EOS
     #   None
     #######################################
     Appium.ConfigureLinux() {
-        throw "Sorry, currently this script only supporte mac."
+        throw "Sorry, currently this script only supports mac."
     }
 
     #######################################
@@ -327,7 +327,7 @@ EOS
     #   None
     #######################################
     Appium.StartServer() {
-        this ValidateAppiumRequiremetns
+        this ValidateAppiumRequirements
         
         output "$(UI.Powerline.PointingArrow)$(UI.Color.Default) Killing appium server processes."
         killProcess appium
@@ -344,7 +344,7 @@ EOS
     #   None
     #######################################
     Appium.StartServerInBackground() {
-        this ValidateAppiumRequiremetns
+        this ValidateAppiumRequirements
 
         output "$(UI.Powerline.PointingArrow)$(UI.Color.Default) Killing appium server processes."
         killProcess appium
@@ -376,7 +376,7 @@ EOS
     #   None
     #######################################
     Appium.RestartServer() {
-        this ValidateAppiumRequiremetns
+        this ValidateAppiumRequirements
 
         output "$(UI.Powerline.PointingArrow)$(UI.Color.Default) Killing appium server processes."
         killProcess appium
