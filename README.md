@@ -10,7 +10,7 @@
 [![MIT License][license-badge]][license]
 [![Donate][donate-badge]][donate]
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 [![PRs Welcome][prs-badge]][prs] 
 [![Code of Conduct][coc-badge]][coc]
 [![Watch on GitHub][github-watch-badge]][github-watch]
@@ -90,7 +90,7 @@ A huge thanks to all of our contributors::
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars0.githubusercontent.com/u/45731?v=3" width="100px;"/><br /><sub><b>Mohamed Meabed</b></sub>](https://github.com/Meabed)<br />[💻](https://github.com//selenium-appium-server/commits?author=Meabed "Code") [📢](#talk-Meabed "Talks") | [<img src="https://avatars2.githubusercontent.com/u/16267321?v=3" width="100px;"/><br /><sub><b>Zeeshan Ahmad</b></sub>](https://github.com/zeeshanu)<br />[💻](https://github.com//selenium-appium-server/commits?author=zeeshanu "Code") [🐛](https://github.com//selenium-appium-server/issues?q=author%3Azeeshanu "Bug reports") [⚠️](https://github.com//selenium-appium-server/commits?author=zeeshanu "Tests") [📖](https://github.com//selenium-appium-server/commits?author=zeeshanu "Documentation") |
+| [<img src="https://avatars0.githubusercontent.com/u/45731?v=3" width="100px;"/><br /><sub><b>Mohamed Meabed</b></sub>](https://github.com/Meabed)<br />[💻](https://github.com//selenium-appium-server/commits?author=Meabed "Code") [📢](#talk-Meabed "Talks") | [<img src="https://avatars2.githubusercontent.com/u/16267321?v=3" width="100px;"/><br /><sub><b>Zeeshan Ahmad</b></sub>](https://github.com/ziishaned)<br />[💻](https://github.com//selenium-appium-server/commits?author=ziishaned "Code") [🐛](https://github.com//selenium-appium-server/issues?q=author%3Aziishaned "Bug reports") [⚠️](https://github.com//selenium-appium-server/commits?author=ziishaned "Tests") [📖](https://github.com//selenium-appium-server/commits?author=ziishaned "Documentation") |
 | :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
